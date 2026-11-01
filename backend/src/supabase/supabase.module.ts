@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { ownerId, supabaseServiceKey, supabaseUrl } from './env';
 
 export const SUPABASE_CLIENT = 'SUPABASE_CLIENT';
 export const SINGLE_USER_ID = 'SINGLE_USER_ID';
@@ -11,12 +12,12 @@ export const SINGLE_USER_ID = 'SINGLE_USER_ID';
     {
       provide: SUPABASE_CLIENT,
       inject: [ConfigService],
-      useFactory: (config: ConfigService): SupabaseClient => {
-        const url = config.get<string>('SUPABASE_URL');
-        const key = config.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+      useFactory: (_config: ConfigService): SupabaseClient => {
+        const url = supabaseUrl();
+        const key = supabaseServiceKey();
         if (!url || !key) {
           throw new Error(
-            'SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env',
+            'Supabase ei ole kytketty: aseta SUPABASE_URL ja SUPABASE_SERVICE_ROLE_KEY (tai kytke Supabase Vercelin Storage-välilehdeltä).',
           );
         }
         return createClient(url, key, {
@@ -27,11 +28,7 @@ export const SINGLE_USER_ID = 'SINGLE_USER_ID';
     {
       provide: SINGLE_USER_ID,
       inject: [ConfigService],
-      useFactory: (config: ConfigService): string => {
-        const id = config.get<string>('SINGLE_USER_ID');
-        if (!id) throw new Error('SINGLE_USER_ID must be set in .env');
-        return id;
-      },
+      useFactory: (_config: ConfigService): string => ownerId(),
     },
   ],
   exports: [SUPABASE_CLIENT, SINGLE_USER_ID],

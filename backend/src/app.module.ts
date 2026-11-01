@@ -14,11 +14,12 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { FreezerModule } from './freezer/freezer.module';
 import { SettingsModule } from './settings/settings.module';
 import { CronModule } from './cron/cron.module';
+import { SetupModule } from './setup/setup.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // Vercelissä ajastus hoidetaan Vercel Cronilla (CronModule)
+    // Vercelissä päivittäiset ajot käynnistyvät käytön yhteydessä (DailyJobsInterceptor)
     ...(process.env.VERCEL ? [] : [ScheduleModule.forRoot()]),
     SupabaseModule,
     AuthModule,
@@ -33,6 +34,7 @@ import { CronModule } from './cron/cron.module';
     FreezerModule,
     SettingsModule,
     CronModule,
+    SetupModule,
   ],
 })
 export class AppModule {}

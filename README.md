@@ -2,46 +2,31 @@
 
 Kotitalouden ruokajärjestelmä: varasto, ostoslista, reseptit, ateriasuunnitelma, pakastin ja vakio-ostokset. Kun varaston tuote vähenee, se siirtyy ostoslistalle. Kun ostos merkitään ostetuksi, varasto päivittyy. Sovellus toimii puhelimessa kotinäytölle asennettavana web-sovelluksena (PWA), ja Claude voi käyttää sitä MCP-yhteyden kautta.
 
-*A self-hosted household food ERP (pantry, shopping list, recipes, meal plans) for one household. The UI is in Finnish. Deploys to Vercel and Supabase free tiers.*
+*A self-hosted household food ERP (pantry, shopping list, recipes, meal plans) for one household. The UI is in Finnish. One-click deploy to Vercel with a free Supabase database.*
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftomipienimaki-stack%2Fhome-erp-public&project-name=home-erp&repository-name=home-erp&env=SUPABASE_URL,SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,SINGLE_USER_ID,CRON_SECRET&envDescription=Supabase-projektin%20arvot%20ja%20oma%20k%C3%A4ytt%C3%A4j%C3%A4tunnus.%20CRON_SECRET%20on%20mik%C3%A4%20tahansa%20pitk%C3%A4%20satunnainen%20merkkijono.&envLink=https%3A%2F%2Fgithub.com%2Ftomipienimaki-stack%2Fhome-erp-public%23asennus)
-
-Jokainen asennus on oma, yhden käyttäjän palvelunsa. Tietosi ovat omassa Supabase-projektissasi, eikä kukaan muu näe niitä. Vercelin Hobby- ja Supabasen Free-taso riittävät kotikäyttöön.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftomipienimaki-stack%2Fhome-erp-public&project-name=home-erp&repository-name=home-erp&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22supabase%22%2C%22productSlug%22%3A%22supabase%22%2C%22protocol%22%3A%22storage%22%7D%5D)
 
 ## Asennus
 
-Varaa aikaa noin 15 minuuttia. Tarvitset tilit palveluihin [Supabase](https://supabase.com), [Vercel](https://vercel.com) ja GitHub.
+Tarvitset GitHub-tunnuksen. Vercel- ja Supabase-tilit syntyvät asennuksen aikana, ja kotikäyttöön riittävät ilmaistasot.
 
-### 1. Supabase
+1. **Paina yllä olevaa Deploy-nappia.** Vercel kopioi koodin GitHub-tiliisi ja ehdottaa Supabase-tietokannan luontia. Hyväksy se, valitse lähin alue (esim. Stockholm tai Frankfurt) ja paina **Deploy**. Build luo tietokannan taulut automaattisesti.
+2. **Avaa sovellus ja luo tunnus.** Ensimmäisellä avauskerralla sovellus pyytää sähköpostin ja salasanan. Sen jälkeen uusia tunnuksia ei voi luoda.
 
-1. Luo uusi Supabase-projekti.
-2. Avaa **SQL Editor → New query**, liitä tiedoston [`supabase/schema.sql`](supabase/schema.sql) koko sisältö ja aja se.
-3. Avaa **Authentication → Users → Add user → Create new user** ja luo itsellesi käyttäjä sähköpostilla ja salasanalla. Kopioi käyttäjän **UID**.
-4. Avaa **Authentication → Sign In / Providers** ja poista käytöstä **Allow new users to sign up**. Sovellus on yhden käyttäjän, joten muiden ei pidä päästä rekisteröitymään.
-5. Avaa **Project Settings → API** (tai **API Keys**) ja kopioi talteen projektin URL, julkinen anon-avain ja palveluavain (service role / secret).
+Puhelimessa saat sovelluksen kotinäytölle selaimen jakovalikosta (**Lisää kotivalikkoon**).
 
-### 2. Vercel
+**Jos Supabase-valintaa ei näkynyt** asennuksen aikana, sovellus kertoo, ettei tietokantaa ole kytketty. Avaa silloin projekti Vercelissä, valitse **Storage → Create Database → Supabase**, kytke se projektiin ja julkaise uudelleen (**Deployments → ⋯ → Redeploy**).
 
-Paina yllä olevaa **Deploy with Vercel** -nappia. Vercel kopioi koodin omaan GitHub-tiliisi ja kysyy nämä arvot:
+Jokainen asennus on oma, yhden kotitalouden palvelunsa. Tietosi ovat omassa Supabase-tietokannassasi, eikä kukaan muu näe niitä.
 
-| Muuttuja | Arvo |
-|---|---|
-| `SUPABASE_URL` | Supabase-projektin URL, esim. `https://abcd1234.supabase.co` |
-| `SUPABASE_ANON_KEY` | Julkinen anon-avain. Tämä päätyy selaimeen, ja se on tarkoitettu siihen. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Palveluavain. Käytetään vain palvelimella. Älä jaa sitä kenellekään. |
-| `SINGLE_USER_ID` | Vaiheessa 1.3 kopioimasi käyttäjän UID |
-| `CRON_SECRET` | Mikä tahansa pitkä satunnainen merkkijono, esim. komennon `openssl rand -hex 32` tulos |
+## Valinnaiset ominaisuudet
 
-Kun julkaisu on valmis, avaa sovelluksen osoite ja kirjaudu sisään vaiheessa 1.3 luomillasi tunnuksilla. Puhelimessa saat sovelluksen kotinäytölle selaimen jakovalikosta (**Lisää kotivalikkoon**).
-
-### 3. Valinnaiset ominaisuudet
-
-Lisää nämä myöhemmin Vercelissä kohdassa **Project → Settings → Environment Variables** ja julkaise uudelleen.
+Lisää nämä Vercelissä kohdassa **Project → Settings → Environment Variables** ja julkaise uudelleen.
 
 | Muuttuja | Mitä se avaa |
 |---|---|
 | `ANTHROPIC_API_KEY` | Reseptin tuonti kuvasta, ateriasuunnitelman generointi ja kauppojen suosikkilistojen tuonti. Avain saadaan osoitteesta [console.anthropic.com](https://console.anthropic.com). Ilman avainta muu sovellus toimii normaalisti. |
-| `HOME_ERP_API_TOKEN` | Clauden MCP-yhteys (katso alla). Pitkä satunnainen merkkijono. |
+| `HOME_ERP_API_TOKEN` | Clauden MCP-yhteys (katso alla). Pitkä satunnainen merkkijono, esim. komennon `openssl rand -hex 32` tulos. |
 
 ## Claude-yhteys (MCP)
 
@@ -83,21 +68,44 @@ Käynnistä Claude-sovellus uudelleen. Työkalut: `pantry_*`, `shopping_*`, `rec
 
 Pakastin: `freezer_items`, valmiit annokset kappaleina (`/freezer`).
 
+## Asennus omaan Supabase-projektiin
+
+Jos haluat käyttää olemassa olevaa Supabase-projektia ilman Vercelin integraatiota:
+
+1. Aja [`supabase/schema.sql`](supabase/schema.sql) Supabasen SQL-editorissa (**SQL Editor → New query**).
+2. Lisää Vercel-projektiin nämä muuttujat (**Project Settings → API** Supabasessa):
+
+| Muuttuja | Arvo |
+|---|---|
+| `SUPABASE_URL` | Projektin URL, esim. `https://abcd1234.supabase.co` |
+| `SUPABASE_ANON_KEY` | Julkinen anon- tai publishable-avain. Tämä päätyy selaimeen, ja se on tarkoitettu siihen. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Palvelu- tai secret-avain. Käytetään vain palvelimella. Älä jaa sitä kenellekään. |
+
+Sovellus lukee myös Vercelin Supabase-integraation nimet (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY` jne.). Jos asetat myös `POSTGRES_URL`-muuttujan, build ajaa uudet migraatiot automaattisesti. Valmiin käyttäjän voi ottaa omistajaksi asettamalla sen UID:n muuttujaan `SINGLE_USER_ID`.
+
+## Tietoturva
+
+- Rajapinta palvelee vain omistajaa (Supabase-tunnus, jonka tunniste on `SINGLE_USER_ID` tai oletustunniste) ja MCP-palvelinta (`HOME_ERP_API_TOKEN`).
+- Tunnuksen luonti on auki vain siihen asti, kun omistaja on luotu. Luo tunnus heti asennuksen jälkeen.
+- Supabase sallii oletuksena uusien käyttäjien rekisteröitymisen julkisella avaimella. Sellainen käyttäjä ei näe sinun tietojasi eikä pääse rajapintaan, mutta voit halutessasi estää rekisteröitymisen kokonaan: Supabasessa **Authentication → Sign In / Providers → Allow new users to sign up** pois.
+
 ## Rakenne
 
 ```
 home-erp/
 ├── api/index.js   Vercel-funktio, joka ajaa backendin
-├── backend/       NestJS-rajapinta (Supabasen palveluavaimella)
+├── backend/       NestJS-rajapinta (Supabasen palveluavaimella) ja migraatioskripti
 ├── frontend/      Vite + React + TypeScript + Tailwind, PWA
 ├── mcp/           MCP-palvelin Claudelle
-├── supabase/      schema.sql ja migraatiot
-└── vercel.json    Build, reititys ja päivittäiset ajot
+├── supabase/      Migraatiot ja koottu schema.sql
+└── vercel.json    Build ja reititys
 ```
 
-Selain kutsuu rajapintaa polussa `/api`, ja `vercel.json` ohjaa pyynnöt funktiolle. Cronit ajavat joka aamu (UTC) klo 3 päivittäisen kulutuksen ja klo 4 kynnystarkistuksen, joka lisää vähiin käyneet tuotteet ostoslistalle. Cron-reitit vaativat otsakkeen `Authorization: Bearer <CRON_SECRET>`, jonka Vercel lisää automaattisesti.
+Selain kutsuu rajapintaa polussa `/api`, ja `vercel.json` ohjaa pyynnöt funktiolle. Build ajaa ensin `backend/scripts/migrate.js`-skriptin, joka ajaa ajamattomat migraatiot ja kirjaa ne tauluun `home_erp_migrations`.
 
-Tekoälyreitit voivat kestää kymmeniä sekunteja. Vercelin Hobby-tason funktioiden oletusaikaraja riittää siihen. Pyynnön runko saa olla enintään 4,5 Mt, joten selain pienentää kuvat ennen lähetystä.
+Päivittäiset ajot eivät tarvitse ajastinta: kun sovellusta käytetään uutena päivänä, se kirjaa varaston päivittäisen kulutuksen ja lisää vähiin käyneet tuotteet ostoslistalle. Ajot ovat idempotentteja, joten väliin jääneet päivät kirjataan kerralla. Jos haluat ajot tiettyyn kellonaikaan, reitit `/api/cron/daily-consumption` ja `/api/cron/daily-threshold-check` toimivat Vercel Cronin kanssa, kun asetat `CRON_SECRET`-muuttujan.
+
+Tekoälyreitit voivat kestää kymmeniä sekunteja. Vercelin funktioiden oletusaikaraja riittää siihen. Pyynnön runko saa olla enintään 4,5 Mt, joten selain pienentää kuvat ennen lähetystä.
 
 ## Paikallinen kehitys
 

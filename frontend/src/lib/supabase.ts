@@ -3,8 +3,13 @@ import { useEffect, useState } from 'react';
 import { createClient, type Session } from '@supabase/supabase-js';
 
 // Only the public anon key and URL belong in the frontend bundle.
-const url = import.meta.env.VITE_SUPABASE_URL ?? 'http://localhost:54321';
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? 'anon-key-not-set';
+const configuredUrl: string | undefined = import.meta.env.VITE_SUPABASE_URL;
+const configuredKey: string | undefined = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const url = configuredUrl ?? 'http://localhost:54321';
+const anonKey = configuredKey ?? 'anon-key-not-set';
+
+/** False, kun build tehtiin ilman Supabase-kytkentää. Näytetään asennusohje kirjautumisen sijaan. */
+export const supabaseConfigured = Boolean(configuredUrl && configuredKey);
 
 export const supabase = createClient(url, anonKey, {
   auth: { persistSession: true, autoRefreshToken: true },

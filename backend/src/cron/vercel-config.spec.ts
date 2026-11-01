@@ -5,24 +5,14 @@ const root = join(__dirname, '../../..');
 const cfg = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf8'));
 
 describe('vercel.json (yksi projekti)', () => {
-  const crons: { path: string; schedule: string }[] = cfg.crons ?? [];
-  const find = (p: string) => crons.find((c) => c.path === p);
-
-  it('cronit osoittavat /api-polkuun', () => {
-    expect(find('/api/cron/daily-consumption')?.schedule).toBe('0 3 * * *');
-    expect(find('/api/cron/daily-threshold-check')?.schedule).toBe('0 4 * * *');
+  it('build ajaa migraatiot ennen käännöstä', () => {
+    expect(cfg.buildCommand).toMatch(/^node backend\/scripts\/migrate\.js && /);
+    expect(cfg.buildCommand).toContain('--prefix backend');
+    expect(cfg.outputDirectory).toBe('frontend/dist');
   });
 
-  it('cronit ajetaan kerran päivässä ja kulutus ennen kynnystarkistusta', () => {
-    expect(crons.length).toBe(2);
-    for (const c of crons) {
-      const [min, hour, dom, mon, dow] = c.schedule.split(' ');
-      expect(min).toMatch(/^\d+$/);
-      expect(hour).toMatch(/^\d+$/);
-      expect([dom, mon, dow]).toEqual(['*', '*', '*']);
-    }
-    const hour = (p: string) => Number(find(p)!.schedule.split(' ')[1]);
-    expect(hour('/api/cron/daily-consumption')).toBeLessThan(hour('/api/cron/daily-threshold-check'));
+  it('ei vaadi ajastettuja ajoja (päivän ajot käynnistyvät käytöstä)', () => {
+    expect(cfg.crons).toBeUndefined();
   });
 
   it('API-rewrite on ennen SPA-fallbackia ja vie polun path-parametrina', () => {
@@ -35,8 +25,6 @@ describe('vercel.json (yksi projekti)', () => {
 
   it('funktio lataa käännetyn serverless-käsittelijän', () => {
     expect(readFileSync(join(root, 'api/index.js'), 'utf8')).toContain('../backend/dist/serverless.js');
-    expect(cfg.outputDirectory).toBe('frontend/dist');
-    expect(cfg.buildCommand).toContain('--prefix backend');
   });
 
   it('erillisiä projektikohtaisia vercel.json-tiedostoja ei ole', () => {

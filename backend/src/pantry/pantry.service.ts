@@ -278,23 +278,35 @@ export class PantryService {
     for (const row of (items ?? []) as unknown as PantryItem[]) {
       const daily = Number(row.daily_consumption);
       if (daily <= 0) continue;
-      // Days since last consumption (or 1 if never run)
-      const last = row.last_consumption_at
-        ? new Date(row.last_consumption_at)
-        : null;
-      const days = last
-        ? Math.max(1, Math.floor((now.getTime() - last.getTime()) / 86_400_000))
-        : 1;
-      const decrement = daily * days;
-      const next = Math.max(0, Number(row.current_quantity) - decrement);
+      const step = consumptionStep(row.last_consumption_at, now);
+      if (!step) continue;
+      const next = Math.max(0, Number(row.current_quantity) - daily * step.days);
       await this.update(row.id, { current_quantity: next });
       await this.sb
         .from(TABLE)
-        .update({ last_consumption_at: now.toISOString() })
+        .update({ last_consumption_at: step.nextMark.toISOString() })
         .eq('id', row.id)
         .eq('user_id', this.userId);
       decremented++;
     }
     return { decremented };
   }
+}
+
+const DAY_MS = 86_400_000;
+
+/**
+ * Kuinka monta täyttä vuorokautta kulutusta kirjataan nyt. Idempotentti: saman
+ * vuorokauden aikana toistettu ajo ei vähennä uudelleen, ja aikaleima siirtyy
+ * vain kirjattujen vuorokausien verran, jottei osavuorokausia häviä.
+ */
+export function consumptionStep(
+  lastIso: string | null | undefined,
+  now: Date,
+): { days: number; nextMark: Date } | null {
+  if (!lastIso) return { days: 1, nextMark: now };
+  const last = new Date(lastIso);
+  const days = Math.floor((now.getTime() - last.getTime()) / DAY_MS);
+  if (days < 1) return null;
+  return { days, nextMark: new Date(last.getTime() + days * DAY_MS) };
 }

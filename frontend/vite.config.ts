@@ -3,15 +3,21 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
 /**
- * Vercelissä frontend ja backend ovat samassa projektissa, joten käyttäjä
- * asettaa Supabasen osoitteen ja anon-avaimen vain kerran ilman VITE_-etuliitettä.
+ * Supabasen osoite ja julkinen avain luetaan usealla nimellä: käsin asetetut
+ * (VITE_*, SUPABASE_*) ja Vercelin Supabase-integraation asettamat (NEXT_PUBLIC_*).
  * Vain nämä kaksi julkista arvoa viedään selaimeen. Palveluavain ei koskaan.
  */
 export default defineConfig(({ mode }) => {
   const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env };
   const pick = (...names: string[]) => names.map((n) => env[n]).find((v) => v);
-  const supabaseUrl = pick('VITE_SUPABASE_URL', 'SUPABASE_URL');
-  const supabaseAnonKey = pick('VITE_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY');
+  const supabaseUrl = pick('VITE_SUPABASE_URL', 'SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL');
+  const supabaseAnonKey = pick(
+    'VITE_SUPABASE_ANON_KEY',
+    'SUPABASE_ANON_KEY',
+    'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    'SUPABASE_PUBLISHABLE_KEY',
+    'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+  );
 
   return {
     plugins: [react()],

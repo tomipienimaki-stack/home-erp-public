@@ -5,11 +5,19 @@ const root = join(__dirname, '../../..');
 const readme = readFileSync(join(root, 'README.md'), 'utf8');
 
 describe('dokumentaatio', () => {
-  it('README sisältää Deploy-napin ja kaikki ympäristömuuttujat', () => {
-    expect(readme).toContain('https://vercel.com/new/clone?repository-url=');
+  it('Deploy-nappi pyytää Supabase-integraation eikä vaadi muuttujia', () => {
+    const url = readme.match(/\(https:\/\/vercel\.com\/new\/clone\?([^)]+)\)/)![1];
+    const params = new URLSearchParams(url);
+    expect(params.get('env')).toBeNull();
+    expect(JSON.parse(params.get('stores')!)).toEqual([
+      expect.objectContaining({ type: 'integration', integrationSlug: 'supabase' }),
+    ]);
+  });
+
+  it('README dokumentoi valinnaiset ja käsiasennuksen muuttujat', () => {
     for (const name of [
       'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SINGLE_USER_ID',
-      'CRON_SECRET', 'ANTHROPIC_API_KEY', 'HOME_ERP_API_TOKEN',
+      'CRON_SECRET', 'ANTHROPIC_API_KEY', 'HOME_ERP_API_TOKEN', 'POSTGRES_URL',
     ]) {
       expect(readme).toContain(name);
     }
