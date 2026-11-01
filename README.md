@@ -4,6 +4,8 @@ Kotitalouden ruokajärjestelmä: varasto, ostoslista, reseptit, ateriasuunnitelm
 
 *A self-hosted household food ERP (pantry, shopping list, recipes, meal plans) for one household. The UI is in Finnish. One-click deploy to Vercel with a free Supabase database.*
 
+**Esittely ja asennusohje: [tomipienimaki-stack.github.io/home-erp-public](https://tomipienimaki-stack.github.io/home-erp-public/)**
+
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftomipienimaki-stack%2Fhome-erp-public&project-name=home-erp&repository-name=home-erp&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22supabase%22%2C%22productSlug%22%3A%22supabase%22%2C%22protocol%22%3A%22storage%22%7D%5D)
 
 ## Asennus
