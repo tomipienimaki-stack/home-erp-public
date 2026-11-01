@@ -19,6 +19,7 @@ export default function LoginView() {
   const [mode, setMode] = useState<Mode>(supabaseConfigured ? 'checking' : 'unconfigured');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [starterRecipes, setStarterRecipes] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -50,7 +51,7 @@ export default function LoginView() {
     const res = await fetch('/api/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, starterRecipes }),
     });
     if (res.status === 409) {
       setMode('login');
@@ -137,6 +138,20 @@ export default function LoginView() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
+        {setup && (
+          <label className="flex items-start gap-2 text-sm text-ink-700">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={starterRecipes}
+              onChange={(e) => setStarterRecipes(e.target.checked)}
+            />
+            <span>
+              Lisää 8 esimerkkireseptiä, jotta näet heti miten viikko ja kauppalista toimivat. Ne on
+              merkitty tagilla "esimerkki" ja voit poistaa ne milloin vain.
+            </span>
+          </label>
+        )}
         {error && (
           <p role="alert" className="text-sm text-terracotta-600">
             {error}

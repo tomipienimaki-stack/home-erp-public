@@ -68,7 +68,22 @@ describe('auth', () => {
     await waitFor(() => expect(signInWithPassword).toHaveBeenCalled());
     const [url, init] = fetchMock.mock.calls[1];
     expect(url).toBe('/api/setup');
-    expect(JSON.parse(init.body)).toEqual({ email: 'a@b.fi', password: 'salasana123' });
+    expect(JSON.parse(init.body)).toEqual({ email: 'a@b.fi', password: 'salasana123', starterRecipes: true });
+  });
+
+  it('esimerkkireseptit voi jättää pois', async () => {
+    fetchMock.mockReset();
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(200, { needsOwner: true }))
+      .mockResolvedValueOnce(jsonResponse(201, { created: true }));
+    signInWithPassword.mockResolvedValue({ error: null });
+    render(<LoginView />);
+    await userEvent.click(await screen.findByRole('checkbox'));
+    await userEvent.type(screen.getByLabelText(/sähköposti/i), 'a@b.fi');
+    await userEvent.type(screen.getByLabelText(/^salasana/i), 'salasana123');
+    await userEvent.click(screen.getByRole('button', { name: /luo tunnus/i }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).starterRecipes).toBe(false);
   });
 
   it('ilman Supabase-kytkentää näytetään ohje', () => {

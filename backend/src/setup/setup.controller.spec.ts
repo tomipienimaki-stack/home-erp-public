@@ -57,3 +57,58 @@ describe('env', () => {
     expect(ownerId({ SINGLE_USER_ID: 'abc' })).toBe('abc');
   });
 });
+
+import { plainToInstance } from 'class-transformer';
+import { validateSync } from 'class-validator';
+import { CreateRecipeDto } from '../recipes/dto';
+import { STARTER_RECIPES, STARTER_TAG } from './starter-recipes';
+
+describe('esimerkkireseptit', () => {
+  it('kaikki läpäisevät reseptin validoinnin ja raaka-aineilla on kategoria ja taso', () => {
+    expect(STARTER_RECIPES).toHaveLength(8);
+    for (const r of STARTER_RECIPES) {
+      const errors = validateSync(plainToInstance(CreateRecipeDto, r));
+      expect({ recipe: r.name, errors: errors.map((e) => e.toString()) }).toEqual({ recipe: r.name, errors: [] });
+      for (const i of r.ingredients) {
+        expect(i.category).toBeTruthy();
+        expect(i.tier).toBeTruthy();
+      }
+    }
+  });
+
+  it('ei sisällä merkkinimiä eikä henkilökohtaisia huomautuksia', () => {
+    const text = JSON.stringify(STARTER_RECIPES).toLowerCase();
+    for (const banned of ['de buyer', 'pasta basilico', 'itse paistoin', 'gullichsen']) {
+      expect(text).not.toContain(banned);
+    }
+  });
+
+  const owner = () => {
+    const admin = {
+      getUserById: jest.fn().mockResolvedValue({ data: { user: null }, error: { status: 404 } }),
+      createUser: jest.fn().mockResolvedValue({ data: {}, error: null }),
+    };
+    const recipes = { create: jest.fn().mockResolvedValue({}) };
+    const ctrl = new SetupController({ auth: { admin } } as any, DEFAULT_OWNER_ID, recipes as any);
+    return { recipes, ctrl };
+  };
+
+  it('lisätään oletuksena esimerkki-tagilla', async () => {
+    const { recipes, ctrl } = owner();
+    expect(await ctrl.createOwner({ email: 'a@b.fi', password: 'salasana123' })).toEqual({ created: true, starterRecipes: 8 });
+    expect(recipes.create).toHaveBeenCalledTimes(8);
+    expect(recipes.create.mock.calls[0][0].tags).toContain(STARTER_TAG);
+  });
+
+  it('voi jättää pois', async () => {
+    const { recipes, ctrl } = owner();
+    expect(await ctrl.createOwner({ email: 'a@b.fi', password: 'salasana123', starterRecipes: false })).toEqual({ created: true, starterRecipes: 0 });
+    expect(recipes.create).not.toHaveBeenCalled();
+  });
+
+  it('yksittäisen reseptin virhe ei kaada tunnuksen luontia', async () => {
+    const { recipes, ctrl } = owner();
+    recipes.create.mockRejectedValueOnce(new Error('verkko'));
+    expect((await ctrl.createOwner({ email: 'a@b.fi', password: 'salasana123' })).starterRecipes).toBe(7);
+  });
+});
