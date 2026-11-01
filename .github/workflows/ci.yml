@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Backend
+        run: cd backend && npm ci && npx tsc --noEmit -p tsconfig.json && npm test
+      - name: Frontend
+        run: cd frontend && npm ci && npx tsc -b && npm test
+      - name: MCP
+        run: cd mcp && npm ci && npx tsc --noEmit
